@@ -15,7 +15,7 @@ class ViewController: UIViewController {
     @IBOutlet weak var sceneView: ARSCNView!
     var matchPicker: UIImagePickerController?
     var replacePicker: UIImagePickerController?
-    var matchImage = UIImage(named: "AnniversaryPhoto")
+    var matchImage = UIImage(named: "AnniversaryPoster")
     var replaceImage = UIImage(named: "Demon")
     
     override func viewDidLoad() {
@@ -26,27 +26,34 @@ class ViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
-        let configuration = ARImageTrackingConfiguration()
-        guard let images = ARReferenceImage.referenceImages(inGroupNamed: "Photos", bundle: .main) else {
-            // TODO: handle error
-            return
-        }
-
-        configuration.trackingImages = images
-        configuration.maximumNumberOfTrackedImages = 1
-        sceneView.session.run(configuration)
+        initialSetup()
     }
     
-    private func setupImages() {
-        let configuration = ARImageTrackingConfiguration()
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        sceneView.session.pause()
+    }
+    
+    private func initialSetup() {
         var images = Set<ARReferenceImage>()
         let image = ARReferenceImage(self.matchImage!.cgImage!, orientation: .up, physicalWidth: 0.7)
         images.insert(image)
         
+        let configuration = ARImageTrackingConfiguration()
         configuration.trackingImages = images
         configuration.maximumNumberOfTrackedImages = 1
-        sceneView.session.run(configuration)
+        sceneView.session.run(configuration, options: [ARSession.RunOptions.resetTracking, ARSession.RunOptions.removeExistingAnchors])
+    }
+    
+    private func setupImages() {
+        var images = Set<ARReferenceImage>()
+        let image = ARReferenceImage(self.matchImage!.cgImage!, orientation: .up, physicalWidth: 0.7)
+        images.insert(image)
+        
+        let configuration = ARImageTrackingConfiguration()
+        configuration.trackingImages = images
+        configuration.maximumNumberOfTrackedImages = 1
+        sceneView.session.run(configuration, options: [ARSession.RunOptions.resetTracking, ARSession.RunOptions.removeExistingAnchors])
     }
 }
 
